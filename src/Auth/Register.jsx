@@ -1,19 +1,36 @@
 import React, { useState } from "react";
-
+import { useAuth } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [err, setErr] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Registration successful!"); 
+    setErr("");
+    try {
+      const user = await register(name, email, password);
+      alert("Registration successful!");
+      if (user.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+    } catch (error) {
+      setErr(error.message || "Registration failed");
+    }
   };
 
   return (
     <div className="auth-container">
       <h2>Register</h2>
+      {err && <div className="alert alert-danger">{err}</div>}
       <form onSubmit={handleSubmit} className="auth-form">
         <input
           type="text"
@@ -46,9 +63,3 @@ function Register() {
 }
 
 export default Register;
-
-
-
-
-
-

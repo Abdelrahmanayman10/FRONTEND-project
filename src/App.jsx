@@ -29,8 +29,13 @@ import RequireRole from "./Auth/RequireRole.jsx";
 import AdminLayout from "./Auth/AdminLayout.jsx";
 import Dashboard from "./Auth/Dashboard.jsx";
 import Users from "./Auth/Users.jsx";
-import Posts from "./Auth/Posts.jsx";
+import AdminMenu from "./Auth/AdminMenu.jsx";
+import AdminBookings from "./Auth/AdminBookings.jsx";
 import Settings from "./Auth/Settings.jsx";
+
+// Customer pieces
+import Profile from "./components/Profile.jsx";
+import MyBookings from "./components/MyBookings.jsx";
 
 export default function App() {
   return (
@@ -40,10 +45,32 @@ export default function App() {
         <Navbar />
 
         <Routes>
-        
+          {/* Public authentication */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-        <Route
+
+          {/* User protected routes */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+                <Footer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-bookings"
+            element={
+              <ProtectedRoute>
+                <MyBookings />
+                <Footer />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin protected routes */}
+          <Route
             path="/admin/*"
             element={
               <ProtectedRoute>
@@ -56,7 +83,8 @@ export default function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="users" element={<Users />} />
-            <Route path="posts" element={<Posts />} />
+            <Route path="bookings" element={<AdminBookings />} />
+            <Route path="menu" element={<AdminMenu />} />
             <Route path="settings" element={<Settings />} />
           </Route>
 
@@ -137,4 +165,3 @@ export default function App() {
     </Router>
   );
 }
-

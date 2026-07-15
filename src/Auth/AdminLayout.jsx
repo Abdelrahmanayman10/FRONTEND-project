@@ -13,7 +13,8 @@ export default function AdminLayout() {
         <nav style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <NavLink to="/admin/dashboard" style={navLinkStyle} end>Dashboard</NavLink>
           <NavLink to="/admin/users" style={navLinkStyle}>Users</NavLink>
-          <NavLink to="/admin/posts" style={navLinkStyle}>Posts</NavLink>
+          <NavLink to="/admin/bookings" style={navLinkStyle}>Bookings</NavLink>
+          <NavLink to="/admin/menu" style={navLinkStyle}>Menu Items</NavLink>
           <NavLink to="/admin/settings" style={navLinkStyle}>Settings</NavLink>
         </nav>
 

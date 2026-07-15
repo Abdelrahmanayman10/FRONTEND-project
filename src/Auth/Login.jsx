@@ -16,11 +16,13 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErr("");
-    const user = await login(email, password);
-   
-
-    if (user.role === "admin") navigate("/admin", { replace: true });
-    else navigate(from, { replace: true });
+    try {
+      const user = await login(email, password);
+      if (user.role === "admin") navigate("/admin", { replace: true });
+      else navigate(from, { replace: true });
+    } catch (error) {
+      setErr(error.message || "Invalid credentials");
+    }
   };
 
   return (

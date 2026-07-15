@@ -1,7 +1,10 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../Auth/AuthContext";
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
+
   return (
     <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top">
       <div className="container">
@@ -78,30 +81,77 @@ export default function Navbar() {
                 Contact
               </NavLink>
             </li>
+            {user && (
+              <>
+                <li className="nav-item">
+                  <NavLink
+                    to="/my-bookings"
+                    className={({ isActive }) =>
+                      `nav-link rounded-pill px-3 py-2 nav-pill ${isActive ? "active" : ""}`
+                    }
+                  >
+                    My Bookings
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink
+                    to="/profile"
+                    className={({ isActive }) =>
+                      `nav-link rounded-pill px-3 py-2 nav-pill ${isActive ? "active" : ""}`
+                    }
+                  >
+                    Profile
+                  </NavLink>
+                </li>
+                {user.role === "admin" && (
+                  <li className="nav-item">
+                    <NavLink
+                      to="/admin"
+                      className={({ isActive }) =>
+                        `nav-link rounded-pill px-3 py-2 nav-pill ${isActive ? "active" : ""}`
+                      }
+                    >
+                      Admin
+                    </NavLink>
+                  </li>
+                )}
+              </>
+            )}
           </ul>
 
 
-          <NavLink className="btn btn-dark rounded-pill px-4 py-2  btnbtn" to="/book-table">
+          <NavLink className="btn btn-dark rounded-pill px-4 py-2 btnbtn me-2" to="/book-table">
             Book A Table
           </NavLink>
 
-    <NavLink
-            to="/Login"
-            className={({ isActive }) =>
-              `nav-link rounded-pill px-3 py-2 nav-pill ${isActive ? "active" : ""}`
-            }
-          >
-            Login
-          </NavLink>
-            
-          <NavLink
-            to="/Register"
-            className={({ isActive }) =>
-              `nav-link rounded-pill px-3 py-2 nav-pill ${isActive ? "active" : ""}`
-            }
-          >
-            Register
-          </NavLink>
+          {user ? (
+            <button
+              onClick={logout}
+              className="nav-link rounded-pill px-3 py-2 nav-pill border-0 bg-transparent text-danger fw-semibold"
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <NavLink
+                to="/Login"
+                className={({ isActive }) =>
+                  `nav-link rounded-pill px-3 py-2 nav-pill ${isActive ? "active" : ""}`
+                }
+              >
+                Login
+              </NavLink>
+                
+              <NavLink
+                to="/Register"
+                className={({ isActive }) =>
+                  `nav-link rounded-pill px-3 py-2 nav-pill ${isActive ? "active" : ""}`
+                }
+              >
+                Register
+              </NavLink>
+            </>
+          )}
       
 
         </div>

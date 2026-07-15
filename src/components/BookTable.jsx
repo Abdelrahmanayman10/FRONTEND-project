@@ -1,20 +1,85 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../Auth/AuthContext";
 
 const BookTable = () => {
+  const { user, token, API_URL } = useAuth();
+  const navigate = useNavigate();
+
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [totalPerson, setTotalPerson] = useState("1 Person");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  // Autofill name and phone if user is logged in
+  useEffect(() => {
+    if (user) {
+      setName(user.name || "");
+      setPhone(user.phone || "");
+    }
+  }, [user]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault(); 
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
     if (!date || !time || !name || !phone || !totalPerson) {
       alert("Please fill in all fields first!");
       return;
     }
-    alert("Booked successfully!");
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`${API_URL}/bookings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ name, phone, date, time, totalPerson })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to make reservation");
+      }
+
+      alert("Booked successfully!");
+      navigate("/my-bookings");
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (!user) {
+    return (
+      <div className="book-table-page text-center py-5">
+        <div className="container py-5" style={{ maxWidth: 500 }}>
+          <div className="card shadow p-5 border-0 rounded-4">
+            <span style={{ fontSize: "4rem" }}>📅</span>
+            <h2 className="mt-3 fw-bold">Reservation Required</h2>
+            <p className="text-secondary mt-2">
+              To book a table at Bistro Bliss, you must have an account. Please sign in or register to continue.
+            </p>
+            <button className="btn btn-dark rounded-pill mt-4 px-4 py-2" onClick={() => navigate("/login")}>
+              Go to Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="book-table-page">
@@ -27,25 +92,26 @@ const BookTable = () => {
       </div>
 
       <div className="book-form-container">
+        {error && <div className="alert alert-danger" style={{ maxWidth: 800, margin: "0 auto 20px" }}>{error}</div>}
         <form className="book-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Date</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
           </div>
 
           <div className="form-group">
             <label>Time</label>
-            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
           </div>
 
           <div className="form-group">
             <label>Name</label>
-            <input type="text" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
+            <input type="text" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
 
           <div className="form-group">
             <label>Phone</label>
-            <input type="tel" placeholder="x-xxxx-xxxx-xxxx" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <input type="tel" placeholder="x-xxxx-xxxx-xxxx" value={phone} onChange={(e) => setPhone(e.target.value)} required />
           </div>
 
           <div className="form-group">
@@ -59,8 +125,8 @@ const BookTable = () => {
             </select>
           </div>
 
-          <button type="submit" className="book-btn">
-            Book A Table
+          <button type="submit" className="book-btn" disabled={loading}>
+            {loading ? "Processing..." : "Book A Table"}
           </button>
         </form>
       </div>
@@ -81,11 +147,3 @@ const BookTable = () => {
 };
 
 export default BookTable;
-
-
-
-
-
-
-
-
