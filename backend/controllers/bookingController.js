@@ -42,7 +42,7 @@ const getMyBookings = async (req, res) => {
 // @access  Private/Admin
 const getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({})
+    const bookings = await Booking.find({}) // get all bookings
       .populate("user", "name email")
       .sort({ createdAt: -1 });
     res.json(bookings);
