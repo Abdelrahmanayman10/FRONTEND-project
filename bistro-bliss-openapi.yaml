@@ -1,0 +1,950 @@
+openapi: 3.0.3
+info:
+  title: Bistro Bliss API
+  description: |
+    REST API for the Bistro Bliss restaurant management system.
+    Handles authentication, menu management, table bookings, and user administration.
+
+    **Authentication:** After logging in or registering, copy the `token` from the response
+    and use it as a Bearer token in the Authorize button above.
+  version: 1.0.0
+  contact:
+    name: Bistro Bliss Dev Team
+
+servers:
+  - url: http://localhost:3001
+    description: Local Development Server
+
+tags:
+  - name: Auth
+    description: User registration, login, and profile management
+  - name: Menu
+    description: Menu item listing and admin management
+  - name: Bookings
+    description: Table reservation management
+  - name: Users
+    description: Admin-only user management
+
+security: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "JWT token obtained from /api/auth/login or /api/auth/register"
+
+  schemas:
+    # ─── Request Schemas ───────────────────────────────────────────
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+          description: "If the email contains 'admin', the user gets the admin role."
+        password:
+          type: string
+          minLength: 6
+          example: secret123
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          example: secret123
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: John Updated
+        email:
+          type: string
+          format: email
+          example: john.updated@example.com
+        phone:
+          type: string
+          example: "01098765432"
+        address:
+          type: string
+          example: "456 New St, Alexandria"
+        password:
+          type: string
+          minLength: 6
+          example: newpassword123
+
+    CreateMenuItemRequest:
+      type: object
+      required:
+        - name
+        - price
+        - img
+        - category
+      properties:
+        name:
+          type: string
+          example: Grilled Salmon
+        price:
+          type: number
+          example: 145
+        img:
+          type: string
+          example: "https://example.com/salmon.jpg"
+        category:
+          type: string
+          enum: [Breakfast, "Main Dishes", Drinks, Desserts]
+          example: "Main Dishes"
+        description:
+          type: string
+          example: "Fresh Atlantic salmon grilled to perfection."
+
+    UpdateMenuItemRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Grilled Salmon Deluxe
+        price:
+          type: number
+          example: 165
+        img:
+          type: string
+          example: "https://example.com/salmon-deluxe.jpg"
+        category:
+          type: string
+          enum: [Breakfast, "Main Dishes", Drinks, Desserts]
+          example: "Main Dishes"
+        description:
+          type: string
+          example: "Upgraded with truffle butter sauce."
+
+    CreateBookingRequest:
+      type: object
+      required:
+        - name
+        - phone
+        - date
+        - time
+        - totalPerson
+      properties:
+        name:
+          type: string
+          example: John Doe
+        phone:
+          type: string
+          example: "01012345678"
+        date:
+          type: string
+          example: "2024-02-14"
+          description: "Reservation date (YYYY-MM-DD)"
+        time:
+          type: string
+          example: "19:00"
+          description: "Reservation time (HH:MM)"
+        totalPerson:
+          type: string
+          example: "4"
+
+    UpdateBookingStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [pending, accepted, rejected]
+          example: accepted
+
+    # ─── Response Schemas ──────────────────────────────────────────
+    UserResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "64f1a2b3c4d5e6f7a8b9c0d1"
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          example: john@example.com
+        role:
+          type: string
+          enum: [user, admin]
+          example: user
+        phone:
+          type: string
+          nullable: true
+          example: "01012345678"
+        address:
+          type: string
+          nullable: true
+          example: "123 Main St, Cairo"
+
+    AuthResponse:
+      allOf:
+        - $ref: "#/components/schemas/UserResponse"
+        - type: object
+          properties:
+            token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0ZjFhMmIzYzRkNWU2ZjdhOGI5YzBkMSIsImlhdCI6MTY5MzAwMDAwMCwiZXhwIjoxNjk1NTkyMDAwfQ.abc123"
+
+    MenuItemResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "64f1a2b3c4d5e6f7a8b9c0d2"
+        name:
+          type: string
+          example: Classic Burger
+        price:
+          type: number
+          example: 89
+        img:
+          type: string
+          example: "https://example.com/burger.jpg"
+        category:
+          type: string
+          enum: [Breakfast, "Main Dishes", Drinks, Desserts]
+          example: "Main Dishes"
+        description:
+          type: string
+          example: "Made with fresh, premium ingredients to satisfy your cravings."
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00.000Z"
+
+    BookingResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "64f1a2b3c4d5e6f7a8b9c0d4"
+        user:
+          type: string
+          example: "64f1a2b3c4d5e6f7a8b9c0d1"
+        name:
+          type: string
+          example: John Doe
+        phone:
+          type: string
+          example: "01012345678"
+        date:
+          type: string
+          example: "2024-02-14"
+        time:
+          type: string
+          example: "19:00"
+        totalPerson:
+          type: string
+          example: "4"
+        status:
+          type: string
+          enum: [pending, accepted, rejected]
+          example: pending
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T12:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T12:00:00.000Z"
+
+    BookingWithUserResponse:
+      allOf:
+        - $ref: "#/components/schemas/BookingResponse"
+        - type: object
+          properties:
+            user:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  example: "64f1a2b3c4d5e6f7a8b9c0d1"
+                name:
+                  type: string
+                  example: John Doe
+                email:
+                  type: string
+                  example: john@example.com
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Error description"
+
+paths:
+  # ════════════════════════════════════
+  #  AUTH
+  # ════════════════════════════════════
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      description: |
+        Creates a new user account. If the email contains the word `admin`,
+        the account will be given the `admin` role automatically.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+            example:
+              name: John Doe
+              email: john@example.com
+              password: secret123
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: User already exists or invalid data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                alreadyExists:
+                  value: { message: "User already exists" }
+                invalidData:
+                  value: { message: "Invalid user data" }
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      description: Authenticates a user and returns a JWT token valid for 30 days.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            example:
+              email: john@example.com
+              password: secret123
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "Invalid email or password"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/auth/profile:
+    get:
+      tags: [Auth]
+      summary: Get current user profile
+      description: Returns the authenticated user's profile data.
+      operationId: getUserProfile
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "Not authorized, no token"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "User not found"
+
+    put:
+      tags: [Auth]
+      summary: Update current user profile
+      description: |
+        Updates the authenticated user's profile. All fields are optional.
+        A new token is returned after update.
+      operationId: updateUserProfile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+            example:
+              name: John Updated
+              phone: "01098765432"
+              address: "456 New St, Alexandria"
+      responses:
+        "200":
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ════════════════════════════════════
+  #  MENU
+  # ════════════════════════════════════
+  /api/menu:
+    get:
+      tags: [Menu]
+      summary: Get all menu items
+      description: Returns the full list of menu items. No authentication required.
+      operationId: getMenuItems
+      responses:
+        "200":
+          description: List of menu items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MenuItemResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      tags: [Menu]
+      summary: Create a menu item (Admin)
+      description: Creates a new menu item. Requires admin privileges.
+      operationId: createMenuItem
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMenuItemRequest"
+            example:
+              name: Grilled Salmon
+              price: 145
+              img: "https://example.com/salmon.jpg"
+              category: "Main Dishes"
+              description: "Fresh Atlantic salmon grilled to perfection."
+      responses:
+        "201":
+          description: Menu item created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItemResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "Not authorized as an admin"
+
+  /api/menu/{id}:
+    put:
+      tags: [Menu]
+      summary: Update a menu item (Admin)
+      description: Updates an existing menu item by ID. Requires admin privileges.
+      operationId: updateMenuItem
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectId of the menu item
+          schema:
+            type: string
+            example: "64f1a2b3c4d5e6f7a8b9c0d2"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMenuItemRequest"
+            example:
+              name: Grilled Salmon Deluxe
+              price: 165
+              description: "Upgraded with truffle butter sauce."
+      responses:
+        "200":
+          description: Menu item updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItemResponse"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Menu item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "Menu item not found"
+
+    delete:
+      tags: [Menu]
+      summary: Delete a menu item (Admin)
+      description: Deletes a menu item by ID. Requires admin privileges.
+      operationId: deleteMenuItem
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectId of the menu item
+          schema:
+            type: string
+            example: "64f1a2b3c4d5e6f7a8b9c0d2"
+      responses:
+        "200":
+          description: Menu item deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Menu item removed"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Menu item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ════════════════════════════════════
+  #  BOOKINGS
+  # ════════════════════════════════════
+  /api/bookings:
+    post:
+      tags: [Bookings]
+      summary: Create a table booking
+      description: Creates a new table reservation for the authenticated user.
+      operationId: createBooking
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookingRequest"
+            example:
+              name: John Doe
+              phone: "01012345678"
+              date: "2024-02-14"
+              time: "19:00"
+              totalPerson: "4"
+      responses:
+        "201":
+          description: Booking created with status 'pending'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      tags: [Bookings]
+      summary: Get all bookings (Admin)
+      description: |
+        Returns all bookings in the system with populated user info.
+        Requires admin privileges.
+      operationId: getAllBookings
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of all bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BookingWithUserResponse"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/bookings/my-bookings:
+    get:
+      tags: [Bookings]
+      summary: Get my bookings
+      description: Returns all bookings belonging to the currently authenticated user, sorted newest first.
+      operationId: getMyBookings
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of user's bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BookingResponse"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/bookings/{id}/status:
+    patch:
+      tags: [Bookings]
+      summary: Update booking status (Admin)
+      description: |
+        Updates the status of a booking. Valid values: `pending`, `accepted`, `rejected`.
+        Requires admin privileges.
+      operationId: updateBookingStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectId of the booking
+          schema:
+            type: string
+            example: "64f1a2b3c4d5e6f7a8b9c0d4"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBookingStatusRequest"
+            example:
+              status: accepted
+      responses:
+        "200":
+          description: Booking status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingResponse"
+        "400":
+          description: Invalid status value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "Invalid booking status"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "Booking not found"
+
+  # ════════════════════════════════════
+  #  USERS (ADMIN)
+  # ════════════════════════════════════
+  /api/users:
+    get:
+      tags: [Users]
+      summary: Get all users (Admin)
+      description: Returns a list of all registered users. Passwords are excluded. Requires admin privileges.
+      operationId: getUsers
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/users/{id}:
+    delete:
+      tags: [Users]
+      summary: Delete a user (Admin)
+      description: |
+        Permanently deletes a user by ID.
+        An admin cannot delete their own account.
+      operationId: deleteUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectId of the user to delete
+          schema:
+            type: string
+            example: "64f1a2b3c4d5e6f7a8b9c0d1"
+      responses:
+        "200":
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User removed successfully"
+        "400":
+          description: Cannot delete yourself
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "You cannot delete yourself"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/users/{id}/role:
+    patch:
+      tags: [Users]
+      summary: Toggle user role (Admin)
+      description: |
+        Toggles a user's role between `user` and `admin`.
+        An admin cannot change their own role.
+      operationId: toggleUserRole
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectId of the user
+          schema:
+            type: string
+            example: "64f1a2b3c4d5e6f7a8b9c0d1"
+      responses:
+        "200":
+          description: Role toggled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    example: "64f1a2b3c4d5e6f7a8b9c0d1"
+                  name:
+                    type: string
+                    example: John Doe
+                  email:
+                    type: string
+                    example: john@example.com
+                  role:
+                    type: string
+                    enum: [user, admin]
+                    example: admin
+        "400":
+          description: Cannot change your own role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: "You cannot change your own role"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
