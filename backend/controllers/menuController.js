@@ -1,4 +1,4 @@
-const MenuItem = require('../models/MenuItem');
+const MenuItem = require("../models/MenuItem");
 
 // @desc    Get all menu items
 // @route   GET /api/menu
@@ -24,7 +24,7 @@ const createMenuItem = async (req, res) => {
       price,
       img,
       category,
-      description
+      description,
     });
 
     const createdItem = await item.save();
@@ -53,7 +53,7 @@ const updateMenuItem = async (req, res) => {
       const updatedItem = await item.save();
       res.json(updatedItem);
     } else {
-      res.status(404).json({ message: 'Menu item not found' });
+      res.status(404).json({ message: "Menu item not found" });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -69,9 +69,9 @@ const deleteMenuItem = async (req, res) => {
 
     if (item) {
       await item.deleteOne();
-      res.json({ message: 'Menu item removed' });
+      res.json({ message: "Menu item removed" });
     } else {
-      res.status(404).json({ message: 'Menu item not found' });
+      res.status(404).json({ message: "Menu item not found" });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -82,5 +82,5 @@ module.exports = {
   getMenuItems,
   createMenuItem,
   updateMenuItem,
-  deleteMenuItem
+  deleteMenuItem,
 };

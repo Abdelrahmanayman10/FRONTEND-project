@@ -1,4 +1,4 @@
-const Booking = require('../models/Booking');
+const Booking = require("../models/Booking");
 
 // @desc    Create a new table booking
 // @route   POST /api/bookings
@@ -13,7 +13,7 @@ const createBooking = async (req, res) => {
       phone,
       date,
       time,
-      totalPerson
+      totalPerson,
     });
 
     const createdBooking = await booking.save();
@@ -28,7 +28,9 @@ const createBooking = async (req, res) => {
 // @access  Private
 const getMyBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const bookings = await Booking.find({ user: req.user._id }).sort({
+      createdAt: -1,
+    });
     res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -40,7 +42,9 @@ const getMyBookings = async (req, res) => {
 // @access  Private/Admin
 const getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({}).populate('user', 'name email').sort({ createdAt: -1 });
+    const bookings = await Booking.find({})
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
     res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -53,8 +57,8 @@ const getAllBookings = async (req, res) => {
 const updateBookingStatus = async (req, res) => {
   const { status } = req.body;
 
-  if (!['pending', 'accepted', 'rejected'].includes(status)) {
-    return res.status(400).json({ message: 'Invalid booking status' });
+  if (!["pending", "accepted", "rejected"].includes(status)) {
+    return res.status(400).json({ message: "Invalid booking status" });
   }
 
   try {
@@ -65,7 +69,7 @@ const updateBookingStatus = async (req, res) => {
       const updatedBooking = await booking.save();
       res.json(updatedBooking);
     } else {
-      res.status(404).json({ message: 'Booking not found' });
+      res.status(404).json({ message: "Booking not found" });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -76,5 +80,5 @@ module.exports = {
   createBooking,
   getMyBookings,
   getAllBookings,
-  updateBookingStatus
+  updateBookingStatus,
 };
