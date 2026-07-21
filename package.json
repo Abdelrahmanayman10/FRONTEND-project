@@ -1,19 +1,20 @@
 {
-  "name": "bistro-bliss",
+  "name": "bistro-bliss-monorepo",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "pnpm --filter bistro-bliss-backend start",
+    "dev:backend": "pnpm --filter bistro-bliss-backend dev",
+    "dev:frontend": "pnpm --filter bistro-bliss dev",
+    "dev": "pnpm run dev:backend & pnpm run dev:frontend",
+    "install:all": "pnpm install",
+    "test:e2e": "playwright test",
+    "test:e2e:tier1": "playwright test tests/e2e/tier1-feature-coverage.spec.js",
+    "test:e2e:tier2": "playwright test tests/e2e/tier2-boundary.spec.js",
+    "test:e2e:tier3": "playwright test tests/e2e/tier3-cross-feature.spec.js",
+    "test:e2e:tier4": "playwright test tests/e2e/tier4-real-world.spec.js"
   },
   "devDependencies": {
-    "vite": "^7.1.2"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^7.8.1"
+    "@playwright/test": "^1.61.1"
   }
 }

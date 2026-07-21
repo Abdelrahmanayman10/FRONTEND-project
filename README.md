@@ -53,7 +53,7 @@ A premium full-stack restaurant booking and management application built with Re
    ```
 3. Create a `.env` file in the `backend` folder:
    ```env
-   PORT=5000
+   PORT=3001
    MONGO_URI=mongodb://127.0.0.1:27017/bistro-bliss
    JWT_SECRET=super_secret_bistro_bliss_key_12345
    ```
@@ -89,14 +89,14 @@ For a full local experience, run both servers in parallel:
    cd backend
    npm run dev
    ```
-   The backend will run on `http://localhost:5000`.
+   The backend will run on `http://localhost:3001`.
 
 #### Start the Frontend Server:
 1. In a separate terminal window, stay at the project root directory and run:
    ```bash
    npm run dev
    ```
-   The Vite dev server will spin up on `http://localhost:5173`. Open this URL in your web browser.
+   The Vite dev server will spin up on `http://localhost:3000`. Open this URL in your web browser.
 
 ---
 
@@ -116,7 +116,7 @@ For testing purposes, you can use these credentials to log in:
 
 ## Running API Validation Tests
 
-We have included a test suite to verify the REST API endpoints. Ensure the backend server is running on `http://localhost:5000` with seeded data, then run:
+We have included a test suite to verify the REST API endpoints. Ensure the backend server is running on `http://localhost:3001` with seeded data, then run:
 
 ```bash
 cd backend
